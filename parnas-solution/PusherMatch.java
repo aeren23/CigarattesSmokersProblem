@@ -1,17 +1,18 @@
 import java.util.concurrent.Semaphore;
 
-public class PusherPaper implements Runnable {
-    private final Semaphore paper;
+// Match pusher: masaya kibrit konduğunu görür ve eksik malzemeyi tamamlatır.
+public class PusherMatch implements Runnable {
+    private final Semaphore match;
     private final Semaphore mutex;
-    private final Semaphore matchSmoker;
+    private final Semaphore paperSmoker;
     private final Semaphore tobaccoSmoker;
     private final Scoreboard scoreboard;
 
-    public PusherPaper(Semaphore paper, Semaphore mutex, Semaphore matchSmoker, 
+    public PusherMatch(Semaphore match, Semaphore mutex, Semaphore paperSmoker,
                        Semaphore tobaccoSmoker, Scoreboard scoreboard) {
-        this.paper = paper;
+        this.match = match;
         this.mutex = mutex;
-        this.matchSmoker = matchSmoker;
+        this.paperSmoker = paperSmoker;
         this.tobaccoSmoker = tobaccoSmoker;
         this.scoreboard = scoreboard;
     }
@@ -20,19 +21,17 @@ public class PusherPaper implements Runnable {
     public void run() {
         try {
             while (true) {
-                paper.acquire();       // Agent PAPER koyunca uyanır
+                match.acquire();
                 mutex.acquire();
 
                 if (scoreboard.isTobacco()) {
-                    // Masada tobacco vardı + şimdi paper geldi => eksik MATCH
                     scoreboard.setTobacco(false);
-                    matchSmoker.release();
-                } else if (scoreboard.isMatch()) {
-                    // Masada match vardı + şimdi paper geldi => eksik TOBACCO
-                    scoreboard.setMatch(false);
+                    paperSmoker.release();
+                } else if (scoreboard.isPaper()) {
+                    scoreboard.setPaper(false);
                     tobaccoSmoker.release();
                 } else {
-                    scoreboard.setPaper(true);
+                    scoreboard.setMatch(true);
                 }
 
                 mutex.release();

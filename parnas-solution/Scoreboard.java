@@ -1,3 +1,4 @@
+// Pushers arası koordinasyon: masada hangi tekli malzeme bekliyor?
 public class Scoreboard {
     private boolean isTobacco = false;
     private boolean isPaper = false;

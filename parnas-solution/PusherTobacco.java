@@ -1,5 +1,6 @@
 import java.util.concurrent.Semaphore;
 
+// Tobacco pusher: masaya tütün konduğunu görür ve kombinasyonu tamamlar.
 public class PusherTobacco implements Runnable {
     private final Semaphore tobacco;
     private final Semaphore mutex;
@@ -7,7 +8,7 @@ public class PusherTobacco implements Runnable {
     private final Semaphore paperSmoker;
     private final Scoreboard scoreboard;
 
-    public PusherTobacco(Semaphore tobacco, Semaphore mutex, Semaphore matchSmoker, 
+    public PusherTobacco(Semaphore tobacco, Semaphore mutex, Semaphore matchSmoker,
                          Semaphore paperSmoker, Scoreboard scoreboard) {
         this.tobacco = tobacco;
         this.mutex = mutex;
@@ -20,19 +21,16 @@ public class PusherTobacco implements Runnable {
     public void run() {
         try {
             while (true) {
-                tobacco.acquire();     // Agent TOBACCO koyunca uyanır
-                mutex.acquire();       // scoreboard kritik bölge
+                tobacco.acquire();
+                mutex.acquire();
 
                 if (scoreboard.isPaper()) {
-                    // Masada paper zaten vardı + şimdi tobacco geldi => eksik MATCH
                     scoreboard.setPaper(false);
-                    matchSmoker.release(); // match sahibi smoker uyanmalı
+                    matchSmoker.release();
                 } else if (scoreboard.isMatch()) {
-                    // Masada match vardı + şimdi tobacco geldi => eksik PAPER
                     scoreboard.setMatch(false);
-                    paperSmoker.release(); // paper sahibi smoker uyanmalı
+                    paperSmoker.release();
                 } else {
-                    // Masada başka yok => tobacco'yu scoreboard'a yaz
                     scoreboard.setTobacco(true);
                 }
 

@@ -1,5 +1,6 @@
 import java.util.concurrent.Semaphore;
 
+// Her içici elindeki malzeme dışındaki iki malzemeyi bekler.
 public class Smoker implements Runnable {
     private final SmokerType type;
     private final Semaphore tobaccoSmoker;
@@ -7,7 +8,7 @@ public class Smoker implements Runnable {
     private final Semaphore matchSmoker;
     private final Semaphore agentSem;
 
-    public Smoker(SmokerType type, Semaphore tobaccoSmoker, Semaphore paperSmoker, 
+    public Smoker(SmokerType type, Semaphore tobaccoSmoker, Semaphore paperSmoker,
                   Semaphore matchSmoker, Semaphore agentSem) {
         this.type = type;
         this.tobaccoSmoker = tobaccoSmoker;
@@ -20,21 +21,15 @@ public class Smoker implements Runnable {
     public void run() {
         try {
             while (true) {
-                // 1) "Benim eksiğim tamamlandı" sinyalini bekle
                 switch (type) {
-                    case TOBACCO -> tobaccoSmoker.acquire(); // (paper+match geldi)
-                    case PAPER   -> paperSmoker.acquire();   // (tobacco+match geldi)
-                    case MATCH   -> matchSmoker.acquire();   // (tobacco+paper geldi)
+                    case TOBACCO -> tobaccoSmoker.acquire();
+                    case PAPER -> paperSmoker.acquire();
+                    case MATCH -> matchSmoker.acquire();
                 }
 
-                // 2) Sigara yap + iç
                 System.out.println("[" + Thread.currentThread().getName() + "] makes cigarette and smokes");
-
-                // 3) Agent'a "devam edebilirsin" sinyali
                 agentSem.release();
-
-                // Demo için biraz bekletelim (gerçek senkronizasyonda şart değil)
-                Thread.sleep(500);
+                Thread.sleep(400);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
